@@ -1,27 +1,35 @@
-# Gestor de gastos personales en Python
+# 💰 MoneyControl
 
-Aplicación de consola desarrollada en Python para registrar ingresos, gastos y consultar un resumen financiero básico.
+MoneyControl es una aplicación web desarrollada con Flask para gestionar ingresos, gastos y balance personal de forma sencilla.
 
 ## Funcionalidades
 
-- Añadir ingresos
-- Añadir gastos
-- Ver todos los movimientos registrados
-- Calcular ingresos totales
-- Calcular gastos totales
-- Mostrar balance actual
+- Registrar ingresos
+- Registrar gastos
+- Añadir descripción, cantidad, categoría y fecha
+- Ver resumen de ingresos, gastos y balance
+- Consultar todos los movimientos en una tabla
 - Guardar los datos en un archivo JSON
 
 ## Tecnologías utilizadas
 
 - Python
+- Flask
+- HTML
+- CSS
 - JSON
-- Git
-- GitHub
+- Git y GitHub
 
-## Cómo ejecutar el proyecto
+## Estructura del proyecto
 
-1. Clona el repositorio:
-
-```bash
-git clone https://github.com/devling02/gestor-gastos-python
+```text
+gestor-gastos-python/
+├── app.py
+├── main.py
+├── datos.json
+├── requirements.txt
+├── README.md
+├── templates/
+│   └── index.html
+└── static/
+    └── style.css
