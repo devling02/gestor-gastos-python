@@ -1,15 +1,8 @@
 [
     {
-        "tipo": "ingreso",
-        "descripcion": "nomina",
-        "cantidad": 1000.0,
-        "categoria": "nominas",
-        "fecha": "2026-06-11"
-    },
-    {
         "tipo": "gasto",
         "descripcion": "comida",
-        "cantidad": 160.0,
+        "cantidad": 1222.0,
         "categoria": "comidas",
         "fecha": "2026-06-11"
     }

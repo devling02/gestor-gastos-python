@@ -62,6 +62,15 @@ def index():
         balance=balance
     )
 
+@app.route("/eliminar/<int:indice>", methods=["POST"])
+def eliminar_movimiento(indice):
+    movimientos = cargar_datos()
+
+    if 0 <= indice < len(movimientos):
+        movimientos.pop(indice)
+        guardar_datos(movimientos)
+
+    return redirect("/")
 
 if __name__ == "__main__":
     app.run(debug=True)

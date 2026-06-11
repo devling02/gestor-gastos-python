@@ -231,3 +231,23 @@ tr:hover {
         padding: 24px;
     }
 }
+.btn-eliminar {
+    padding: 8px 12px;
+    font-size: 14px;
+    background: #ef4444;
+    box-shadow: none;
+    border-radius: 10px;
+}
+
+.btn-eliminar:hover {
+    background: #dc2626;
+    transform: none;
+}
+.movimientos form {
+    display: inline;
+}
+
+.movimientos button {
+    width: auto;
+    margin: 0;
+}
