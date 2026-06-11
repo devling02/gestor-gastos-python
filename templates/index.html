@@ -90,7 +90,7 @@
                     <td>{{ movimiento.cantidad }} €</td>
 
                     <td>
-                        <form action="{{ url_for('eliminar_movimiento', indice=loop.index0) }}" method="POST">
+                        <form action="{{ url_for('eliminar_movimiento', movimiento_id=movimiento.id) }}" method="POST">
                             <button type="submit" class="btn-eliminar">Eliminar</button>
                         </form>
                     </td>

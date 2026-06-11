@@ -5,5 +5,33 @@
         "cantidad": 1222.0,
         "categoria": "comidas",
         "fecha": "2026-06-11"
+    },
+    {
+        "tipo": "gasto",
+        "descripcion": "Ropa",
+        "cantidad": 10.0,
+        "categoria": "Ropa",
+        "fecha": "2026-06-11"
+    },
+    {
+        "tipo": "ingreso",
+        "descripcion": "aguinaldo",
+        "cantidad": 15.0,
+        "categoria": "dinero",
+        "fecha": "2026-06-11"
+    },
+    {
+        "tipo": "ingreso",
+        "descripcion": "nomina",
+        "cantidad": 2000.0,
+        "categoria": "nominas",
+        "fecha": "2026-06-11"
+    },
+    {
+        "tipo": "gasto",
+        "descripcion": "Ropa",
+        "cantidad": 200.0,
+        "categoria": "ropa",
+        "fecha": "2026-06-11"
     }
 ]
