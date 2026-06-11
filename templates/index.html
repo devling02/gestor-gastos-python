@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Gestor de gastos</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    </head>
+    <body>
+        <div class="contenedor">
+            <div class="cabecera">
+                <h1>💰MoneyControl</h1>
+                <p>Gestiona tus ingresos, gastos y balance personal de forma sencilla</p>
+
+            </div>
+           
+            <section class="resumen">
+                <div class="tarjeta ingreso">
+                    <span>💰Ingresos</span>
+                    <h2>{{ingresos}} €</h2>
+
+                </div>
+                <div class="tarjeta gasto">
+                    <span>💸Gastos</span>
+                    <h2>{{gastos}}</h2>
+                </div>
+                <div class="tarjeta balance">
+                    <span>📊Balance</span>
+                    <h2>{{balance}}</h2>
+
+                </div>
+            </section>
+                <section class="formulario">
+                    <h2>➕Añadir movimiento</h2>
+                    <form method="POST">
+                        <label>Tipo</label>
+                        <select name="tipo">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="gasto">Gasto</option>
+
+                        </select>
+                        <label>Descripción</label>
+                        <input type="text" name="descripcion" required>
+                        <label>Cantidad</label>
+                        <input type="number" name="cantidad" step="0.01" required>
+                            <label>Categoría</label>
+                        <input type="text" name="categoria" required>
+                        <button type="submit">Guardar movimiento</button>
+                    
+                    </form>
+                </section>
+                <section class="movimientos">
+                    <h2>📋Movimientos</h2>
+                    {% if movimientos %}
+                    <table>
+                        <tr>
+                            <th>📅Fecha</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Categoría</th>
+                            <th>Cantidad</th>
+                        </tr>
+                        
+                            {% for movimiento in movimientos %}
+                            <tr>
+                                <td>{{movimiento.fecha}}</td>
+                                <td>{{movimiento.tipo}}</td>
+                                <td>{{movimiento.descripcion}}</td>
+                                <td>{{movimiento.categoria}}</td>
+                                <td>{{movimiento.cantidad}}</td>
+                            </tr>
+                            {% endfor %}
+
+        
+                    </table>
+                    {% else %}
+                    <p>No hay movimientos guardados.</p>
+                    {% endif %}
+
+            </section>
+        </div>
+    </body>
+</html>
