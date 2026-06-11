@@ -2,6 +2,13 @@
 
 MoneyControl es una aplicación web desarrollada con Flask para gestionar ingresos, gastos y balance personal de forma sencilla.
 
+## Demo online
+
+Puedes probar la aplicación aquí:
+
+https://moneycontrol-cx2j.onrender.com
+
+
 ## Funcionalidades
 
 - Registrar ingresos
@@ -33,9 +40,3 @@ gestor-gastos-python/
 │   └── index.html
 └── static/
     └── style.css
-
-## Demo online
-
-Puedes probar la aplicación aquí:
-
-https://moneycontrol-cx2j.onrender.com
