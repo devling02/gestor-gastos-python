@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16
+    container_name: moneycontrol_db
+    restart: always
+    environment:
+      POSTGRES_DB: moneycontrol
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    container_name: moneycontrol_app
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/moneycontrol
+      SECRET_KEY: change-this-secret-key
+    ports:
+      - "5050:5050"
+
+volumes:
+  postgres_data:
