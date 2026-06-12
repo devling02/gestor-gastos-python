@@ -17,6 +17,14 @@
         <div class="cabecera">
             <h1>💰 MoneyControl</h1>
             <p>Gestiona tus ingresos, gastos y balance personal de forma sencilla.</p>
+
+        </div>
+        <div>
+          <p>Sesión iniciada como: {{ email }}</p>
+
+           <form action="{{ url_for('logout') }}" method="POST">
+             <button type="submit" class="btn-eliminar">Cerrar sesión</button>
+           </form>
         </div>
 
         <section class="resumen">

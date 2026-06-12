@@ -1,10 +1,10 @@
 import os
-import uuid
 from datetime import date
 
 import psycopg
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 
@@ -20,11 +20,46 @@ def obtener_conexion():
     return psycopg.connect(DATABASE_URL, autocommit=True)
 
 
-def obtener_usuario_id():
-    if "usuario_id" not in session:
-        session["usuario_id"] = str(uuid.uuid4())
+def usuario_actual():
+    usuario_id = session.get("usuario_id")
+    if usuario_id is None:
+        return None
+    try:
+        return int(usuario_id)
+    except (ValueError, TypeError):
+        session.clear()
+        return None
 
-    return session["usuario_id"]
+def buscar_usuario_por_email(email):
+    with obtener_conexion() as conexion:
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id, email, password_hash
+                FROM usuarios
+                WHERE email = %s
+                """,
+                (email,)
+            )
+            return cursor.fetchone()
+
+
+def crear_usuario(email, password):
+    password_hash = generate_password_hash(password)
+
+    with obtener_conexion() as conexion:
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO usuarios (email, password_hash)
+                VALUES (%s, %s)
+                RETURNING id
+                """,
+                (email, password_hash)
+            )
+            usuario_id = cursor.fetchone()[0]
+
+    return usuario_id
 
 
 def cargar_movimientos(usuario_id):
@@ -39,7 +74,6 @@ def cargar_movimientos(usuario_id):
                 """,
                 (usuario_id,)
             )
-
             filas = cursor.fetchall()
 
     movimientos = []
@@ -53,7 +87,6 @@ def cargar_movimientos(usuario_id):
             "categoria": fila[4],
             "fecha": fila[5]
         }
-
         movimientos.append(movimiento)
 
     return movimientos
@@ -91,19 +124,68 @@ def eliminar_movimiento_bd(usuario_id, movimiento_id):
             )
 
 
-@app.route("/test-db")
-def test_db():
-    with obtener_conexion() as conexion:
-        with conexion.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM movimientos")
-            total = cursor.fetchone()[0]
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
 
-    return f"Conexión correcta. Movimientos en la base de datos: {total}"
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+
+        if not email or not password:
+            error = "Debes completar todos los campos."
+        elif len(password) < 6:
+            error = "La contraseña debe tener al menos 6 caracteres."
+        elif buscar_usuario_por_email(email):
+            error = "Ya existe una cuenta con ese email."
+        else:
+            usuario_id = crear_usuario(email, password)
+            session["usuario_id"] = usuario_id
+            session["email"] = email
+            return redirect(url_for("index"))
+
+    return render_template("register.html", error=error)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+
+        usuario = buscar_usuario_por_email(email)
+
+        if usuario is None:
+            error = "Email o contraseña incorrectos."
+        else:
+            usuario_id = usuario[0]
+            usuario_email = usuario[1]
+            password_hash = usuario[2]
+
+            if check_password_hash(password_hash, password):
+                session["usuario_id"] = usuario_id
+                session["email"] = usuario_email
+                return redirect(url_for("index"))
+            else:
+                error = "Email o contraseña incorrectos."
+
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    usuario_id = obtener_usuario_id()
+    usuario_id = usuario_actual()
+
+    if usuario_id is None:
+        return redirect(url_for("login"))
 
     if request.method == "POST":
         tipo = request.form["tipo"]
@@ -119,7 +201,7 @@ def index():
             categoria
         )
 
-        return redirect("/")
+        return redirect(url_for("index"))
 
     movimientos = cargar_movimientos(usuario_id)
 
@@ -139,16 +221,21 @@ def index():
         movimientos=movimientos,
         ingresos=ingresos,
         gastos=gastos,
-        balance=balance
+        balance=balance,
+        email=session.get("email")
     )
 
 
 @app.route("/eliminar/<int:movimiento_id>", methods=["POST"])
 def eliminar_movimiento(movimiento_id):
-    usuario_id = obtener_usuario_id()
+    usuario_id = usuario_actual()
+
+    if usuario_id is None:
+        return redirect(url_for("login"))
+
     eliminar_movimiento_bd(usuario_id, movimiento_id)
 
-    return redirect("/")
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":

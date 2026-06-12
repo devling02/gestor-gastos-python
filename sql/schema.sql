@@ -1,6 +1,13 @@
+CREATE TABLE IF NOT EXISTS usuarios (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS movimientos (
     id BIGSERIAL PRIMARY KEY,
-    usuario_id TEXT NOT NULL,
+    usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     tipo TEXT NOT NULL,
     descripcion TEXT NOT NULL,
     cantidad NUMERIC(10, 2) NOT NULL,
