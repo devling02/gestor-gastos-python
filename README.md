@@ -14,14 +14,17 @@ Puedes probar la aplicación aquí:
 
 ## Funcionalidades
 
-* Registrar ingresos
-* Registrar gastos
-* Añadir descripción, cantidad, categoría y fecha
-* Ver resumen de ingresos, gastos y balance
-* Consultar movimientos en una tabla
-* Eliminar movimientos
-* Guardar los datos en PostgreSQL
-* Separar movimientos por usuario mediante sesión
+- Registro de usuarios
+- Inicio de sesión
+- Cierre de sesión
+- Contraseñas cifradas
+- Registrar ingresos
+- Registrar gastos
+- Ver resumen de ingresos, gastos y balance
+- Consultar movimientos en una tabla
+- Eliminar movimientos
+- Cada usuario solo puede ver sus propios movimientos
+- Guardar datos en PostgreSQL
 
 ## Tecnologías utilizadas
 
@@ -210,13 +213,13 @@ Proyecto en desarrollo activo como parte de mi portfolio de aprendizaje en desar
 
 ## Próximas mejoras
 
-* Añadir autenticación real con registro e inicio de sesión
-* Cifrar contraseñas de usuario
-* Asociar movimientos a usuarios registrados
-* Añadir filtros por mes y categoría
-* Añadir edición de movimientos
-* Crear gráficos de ingresos y gastos
-* Mejorar validaciones de formularios
+- Añadir filtros por mes y categoría
+- Añadir edición de movimientos
+- Crear gráficos de ingresos y gastos
+- Mejorar validaciones de formularios
+- Añadir tests básicos
+- Mejorar la estructura interna del proyecto
+- Preparar una versión de producción más robusta
 * Añadir tests básicos
 * Mejorar la estructura interna del proyecto
 * Preparar una versión de producción más robusta
