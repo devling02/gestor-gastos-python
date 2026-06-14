@@ -9,108 +9,512 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    {% if vista == "graficos" %}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% endif %}
 </head>
 
 <body>
     <div class="contenedor">
 
+        <div class="usuario-barra">
+            <div class="usuario-info">
+                <span>{{ email }}</span>
+
+                <form action="{{ url_for('logout') }}" method="POST">
+                    <button type="submit" class="btn-logout">Cerrar sesión</button>
+                </form>
+            </div>
+        </div>
+
         <div class="cabecera">
             <h1>💰 MoneyControl</h1>
             <p>Gestiona tus ingresos, gastos y balance personal de forma sencilla.</p>
-
-        </div>
-        <div>
-          <p>Sesión iniciada como: {{ email }}</p>
-
-           <form action="{{ url_for('logout') }}" method="POST">
-             <button type="submit" class="btn-eliminar">Cerrar sesión</button>
-           </form>
         </div>
 
-        <section class="resumen">
-            <div class="tarjeta ingreso">
-                <span>💰 Ingresos</span>
-                <h2>{{ ingresos }} €</h2>
-            </div>
+        <nav class="menu-principal">
+            <a href="{{ url_for('index', vista='resumen') }}" class="{% if vista == 'resumen' %}activo{% endif %}">
+                🏠 Resumen
+            </a>
 
-            <div class="tarjeta gasto">
-                <span>💸 Gastos</span>
-                <h2>{{ gastos }} €</h2>
-            </div>
+            <a href="{{ url_for('index', vista='movimientos') }}" class="{% if vista == 'movimientos' %}activo{% endif %}">
+                📋 Movimientos
+            </a>
 
-            <div class="tarjeta balance">
-                <span>📊 Balance</span>
-                <h2>{{ balance }} €</h2>
-            </div>
-        </section>
+            <a href="{{ url_for('index', vista='categorias') }}" class="{% if vista == 'categorias' %}activo{% endif %}">
+                🏷️ Categorías
+            </a>
 
-        <section class="formulario">
-            <h2>➕ Añadir movimiento</h2>
+            <a href="{{ url_for('index', vista='graficos') }}" class="{% if vista == 'graficos' %}activo{% endif %}">
+                📈 Vista gráfica
+            </a>
+        </nav>
 
-            <form method="POST">
-                <label>Tipo</label>
-                <select name="tipo">
-                    <option value="ingreso">💰 Ingreso</option>
-                    <option value="gasto">💸 Gasto</option>
-                </select>
+        {% if vista == "resumen" %}
+            <section class="resumen">
+                <div class="tarjeta ingreso">
+                    <span>💰 Ingresos totales</span>
+                    <h2>{{ ingresos }} €</h2>
+                </div>
 
-                <label>Descripción</label>
-                <input type="text" name="descripcion" required>
+                <div class="tarjeta gasto">
+                    <span>💸 Gastos totales</span>
+                    <h2>{{ gastos }} €</h2>
+                </div>
 
-                <label>Cantidad</label>
-                <input type="number" name="cantidad" step="0.01" required>
+                <div class="tarjeta balance">
+                    <span>📊 Balance total</span>
+                    <h2>{{ balance }} €</h2>
+                </div>
+            </section>
 
-                <label>Categoría</label>
-                <input type="text" name="categoria" required>
+            <section class="resumen-mes-card">
+                <div class="resumen-mes-header">
+                    <div>
+                        <h2>📅 Este mes</h2>
+                        <p>Resumen rápido del mes actual.</p>
+                    </div>
 
-                <button type="submit">Guardar movimiento</button>
-            </form>
-        </section>
+                    <div class="balance-burbuja {{ estado_balance_mes.clase }}">
+                        <span>{{ estado_balance_mes.icono }}</span>
+                        <strong>{{ estado_balance_mes.titulo }}</strong>
+                        <small>{{ estado_balance_mes.mensaje }}</small>
+                    </div>
+                </div>
 
-        <section class="movimientos">
-            <h2>📋 Movimientos</h2>
+                <div class="resumen-mes-grid">
+                    <div>
+                        <span>Ingresos del mes</span>
+                        <strong class="ingreso-texto">{{ ingresos_mes }} €</strong>
+                    </div>
 
-            {% if movimientos %}
-            <table>
-                <tr>
-                    <th>📅 Fecha</th>
-                    <th>Tipo</th>
-                    <th>Descripción</th>
-                    <th>Categoría</th>
-                    <th>Cantidad</th>
-                    <th>Acción</th>
-                </tr>
+                    <div>
+                        <span>Gastos del mes</span>
+                        <strong class="gasto-texto">{{ gastos_mes }} €</strong>
+                    </div>
 
-                {% for movimiento in movimientos %}
-                <tr>
-                    <td>{{ movimiento.fecha }}</td>
+                    <div>
+                        <span>Balance del mes</span>
+                        <strong>{{ balance_mes }} €</strong>
+                    </div>
+                </div>
+            </section>
 
-                    <td>
-                        {% if movimiento.tipo == "ingreso" %}
-                            💰 Ingreso
-                        {% else %}
-                            💸 Gasto
+            <section class="dashboard-resumen">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <div>
+                            <h2>🏆 Categoría principal</h2>
+                            <p>La categoría donde más dinero has gastado.</p>
+                        </div>
+                    </div>
+
+                    {% if categoria_top %}
+                        <div class="categoria-destacada">
+                            <span>{{ categoria_top.categoria }}</span>
+                            <strong>{{ categoria_top.total }} €</strong>
+                        </div>
+
+                        <div class="barra-resumen">
+                            <div style="width: {{ categoria_top.porcentaje }}%;"></div>
+                        </div>
+                    {% else %}
+                        <p class="mensaje-vacio">Todavía no hay gastos por categoría.</p>
+                    {% endif %}
+                </div>
+
+                <div class="dashboard-card ultimos-card">
+                    <div class="dashboard-card-header">
+                        <div>
+                            <h2>🕒 Últimos movimientos</h2>
+                            <p>Los movimientos más recientes registrados.</p>
+                        </div>
+
+                        <a href="{{ url_for('index', vista='movimientos') }}">Ver todos</a>
+                    </div>
+
+                    {% if ultimos_movimientos %}
+                        <div class="lista-ultimos">
+                            {% for movimiento in ultimos_movimientos %}
+                                <div class="ultimo-item">
+                                    <div>
+                                        <strong>{{ movimiento.descripcion }}</strong>
+                                        <span>{{ movimiento.fecha }} · {{ movimiento.categoria }}</span>
+                                    </div>
+
+                                    {% if movimiento.tipo == "ingreso" %}
+                                        <b class="importe ingreso-texto">+{{ movimiento.cantidad }} €</b>
+                                    {% else %}
+                                        <b class="importe gasto-texto">-{{ movimiento.cantidad }} €</b>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="mensaje-vacio">Todavía no has añadido movimientos.</p>
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
+
+        {% if vista == "categorias" %}
+            <section class="categorias-seccion">
+                <div class="movimientos-cabecera">
+                    <div>
+                        <h2>🏷️ Gastos por categoría</h2>
+                        <p>Consulta en qué categorías se concentra tu gasto.</p>
+                    </div>
+                </div>
+
+                {% if resumen_categorias %}
+                    <div class="categorias-total">
+                        <span>Total gastado</span>
+                        <strong>{{ total_gastos_categoria }} €</strong>
+                    </div>
+
+                    <div class="lista-categorias">
+                        {% for item in resumen_categorias %}
+                            <div class="categoria-linea">
+                                <div class="categoria-linea-info">
+                                    <span>{{ item.categoria }}</span>
+                                    <strong>{{ item.total }} €</strong>
+                                </div>
+
+                                <div class="categoria-barra">
+                                    <div style="width: {{ item.porcentaje }}%;"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="mensaje-vacio">Todavía no hay gastos para mostrar por categoría.</p>
+                {% endif %}
+            </section>
+        {% endif %}
+
+        {% if vista == "graficos" %}
+            <section class="grafico-seccion">
+                <div class="grafico-cabecera">
+                    <div>
+                        <h2>📈 Vista gráfica</h2>
+                        <p>{{ datos_grafico.titulo }}</p>
+                    </div>
+
+                    <div class="grafico-tabs">
+                        <a href="{{ url_for('index', vista='graficos', grafico='mensual', mes=datos_grafico.mes, anio=datos_grafico.anio) }}" class="{% if datos_grafico.periodo == 'mensual' %}activo{% endif %}">
+                            Mensual
+                        </a>
+
+                        <a href="{{ url_for('index', vista='graficos', grafico='anual', mes=datos_grafico.mes, anio=datos_grafico.anio) }}" class="{% if datos_grafico.periodo == 'anual' %}activo{% endif %}">
+                            Anual
+                        </a>
+                    </div>
+                </div>
+
+                <form method="GET" class="panel-filtros buscador">
+                    <input type="hidden" name="vista" value="graficos">
+                    <input type="hidden" name="grafico" value="{{ datos_grafico.periodo }}">
+
+                    {% if datos_grafico.periodo == "mensual" %}
+                        <select name="mes">
+                            {% for mes in meses %}
+                                <option value="{{ mes.numero }}" {% if datos_grafico.mes == mes.numero %}selected{% endif %}>
+                                    {{ mes.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="hidden" name="mes" value="{{ datos_grafico.mes }}">
+                    {% endif %}
+
+                    <select name="anio">
+                        {% for anio in anios_disponibles %}
+                            <option value="{{ anio }}" {% if datos_grafico.anio == anio %}selected{% endif %}>
+                                {{ anio }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit">Actualizar gráfico</button>
+                </form>
+
+                <div class="grafico-contenedor">
+                    <canvas id="graficoFinanzas"></canvas>
+                </div>
+            </section>
+        {% endif %}
+
+        {% if vista == "movimientos" %}
+            <section class="formulario">
+                <h2>➕ Añadir movimiento</h2>
+
+                <form method="POST" class="form-movimiento">
+                    <div class="campo">
+                        <label>Tipo</label>
+                        <select name="tipo" required>
+                            <option value="ingreso">💰 Ingreso</option>
+                            <option value="gasto">💸 Gasto</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Descripción</label>
+                        <input 
+                            type="text" 
+                            name="descripcion" 
+                            placeholder="Ej: Mercadona, nómina, veterinario..." 
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label>Cantidad</label>
+                        <input 
+                            type="number" 
+                            name="cantidad" 
+                            step="0.01" 
+                            min="0.01" 
+                            placeholder="Ej: 25.50" 
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label>Categoría</label>
+                        <select name="categoria" required>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria }}">{{ categoria }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Fecha</label>
+                        <input type="date" name="fecha" required>
+                    </div>
+
+                    <button type="submit" class="btn-principal">Guardar movimiento</button>
+                </form>
+            </section>
+
+            <section class="movimientos">
+                <div class="movimientos-cabecera">
+                    <div>
+                        <h2>📋 Movimientos</h2>
+                        <p>Consulta, busca y filtra tus ingresos y gastos.</p>
+                    </div>
+                </div>
+
+                <div class="panel-filtros">
+                    <div class="filtros">
+                        <a href="{{ url_for('index', vista='movimientos', busqueda=busqueda, categoria=filtro_categoria) }}" class="{% if not filtro_tipo %}activo{% endif %}">
+                            Todos
+                        </a>
+
+                        <a href="{{ url_for('index', vista='movimientos', tipo='ingreso', busqueda=busqueda, categoria=filtro_categoria) }}" class="{% if filtro_tipo == 'ingreso' %}activo{% endif %}">
+                            Ingresos
+                        </a>
+
+                        <a href="{{ url_for('index', vista='movimientos', tipo='gasto', busqueda=busqueda, categoria=filtro_categoria) }}" class="{% if filtro_tipo == 'gasto' %}activo{% endif %}">
+                            Gastos
+                        </a>
+                    </div>
+
+                    <form method="GET" class="buscador">
+                        <input type="hidden" name="vista" value="movimientos">
+
+                        {% if filtro_tipo %}
+                            <input type="hidden" name="tipo" value="{{ filtro_tipo }}">
                         {% endif %}
-                    </td>
 
-                    <td>{{ movimiento.descripcion }}</td>
-                    <td>{{ movimiento.categoria }}</td>
-                    <td>{{ movimiento.cantidad }} €</td>
+                        <input 
+                            type="text" 
+                            name="busqueda" 
+                            placeholder="Buscar por descripción..." 
+                            value="{{ busqueda }}"
+                        >
 
-                    <td>
-                        <form action="{{ url_for('eliminar_movimiento', movimiento_id=movimiento.id) }}" method="POST">
-                            <button type="submit" class="btn-eliminar">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
+                        <select name="categoria">
+                            <option value="">Todas las categorías</option>
 
-            {% else %}
-                <p>No hay movimientos guardados.</p>
-            {% endif %}
-        </section>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria }}" {% if filtro_categoria == categoria %}selected{% endif %}>
+                                    {{ categoria }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="submit">Filtrar</button>
+
+                        {% if busqueda or filtro_categoria %}
+                            <a href="{{ url_for('index', vista='movimientos', tipo=filtro_tipo) }}" class="limpiar-busqueda">
+                                Limpiar
+                            </a>
+                        {% endif %}
+                    </form>
+                </div>
+
+                {% if movimientos %}
+                    <div class="tabla-contenedor">
+                        <table>
+                            <tr>
+                                <th>📅 Fecha</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Categoría</th>
+                                <th>Cantidad</th>
+                                <th>Acción</th>
+                            </tr>
+
+                            {% for movimiento in movimientos %}
+                                <tr>
+                                    <td>{{ movimiento.fecha }}</td>
+
+                                    <td>
+                                        {% if movimiento.tipo == "ingreso" %}
+                                            💰 Ingreso
+                                        {% else %}
+                                            💸 Gasto
+                                        {% endif %}
+                                    </td>
+
+                                    <td>{{ movimiento.descripcion }}</td>
+                                    <td>{{ movimiento.categoria }}</td>
+                                    <td>{{ movimiento.cantidad }} €</td>
+
+                                    <td>
+                                        <form action="{{ url_for('eliminar_movimiento', movimiento_id=movimiento.id) }}" method="POST">
+                                            <button type="submit" class="btn-eliminar">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="mensaje-vacio">No hay movimientos guardados con esos filtros.</p>
+                {% endif %}
+            </section>
+        {% endif %}
 
     </div>
+
+    {% if vista == "graficos" %}
+        <script>
+            const labels = {{ datos_grafico.labels | tojson }};
+            const ingresos = {{ datos_grafico.ingresos | tojson }};
+            const gastos = {{ datos_grafico.gastos | tojson }};
+            const periodoGrafico = "{{ datos_grafico.periodo }}";
+
+            const maxDato = Math.max(...ingresos, ...gastos, 0);
+
+            let escalaMinima = 2000;
+
+            if (periodoGrafico === "mensual") {
+                escalaMinima = 2000;
+            } else if (periodoGrafico === "anual") {
+                escalaMinima = 20000;
+            }
+
+            const maximoGrafico = Math.max(maxDato * 1.2, escalaMinima);
+
+            function formatearEuros(valor) {
+                return new Intl.NumberFormat("es-ES", {
+                    style: "currency",
+                    currency: "EUR",
+                    maximumFractionDigits: 0
+                }).format(valor);
+            }
+
+            const ctx = document.getElementById("graficoFinanzas");
+
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Ingresos",
+                            data: ingresos,
+                            borderColor: "#22c55e",
+                            backgroundColor: "rgba(34, 197, 94, 0.12)",
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 3
+                        },
+                        {
+                            label: "Gastos",
+                            data: gastos,
+                            borderColor: "#ef4444",
+                            backgroundColor: "rgba(239, 68, 68, 0.10)",
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: "index",
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    weight: "bold"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ": " + formatearEuros(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: maximoGrafico,
+                            ticks: {
+                                font: {
+                                    size: 13
+                                },
+                                callback: function(value) {
+                                    return formatearEuros(value);
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: "Importe",
+                                font: {
+                                    size: 14,
+                                    weight: "bold"
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 13
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    {% endif %}
 </body>
 </html>
